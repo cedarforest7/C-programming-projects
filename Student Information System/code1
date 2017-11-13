@@ -1,1 +1,362 @@
-aaa
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <ctype.h>
+#include <conio.h>
+
+typedef struct student
+{
+    int id;
+    char name[20];
+    char gender[5];
+    char birthdate[20];
+    struct student *next;
+}student;
+
+student *head = NULL;
+int length;
+void create()
+{
+    student *p1,*p2;
+    length = 0;
+    p1 = (student *)malloc(sizeof(student));
+    p1->id = -1;
+    if(head == NULL)
+    {
+        head = p1;
+    }
+    printf("Please input the student's ID, name, gender and birthdate:\n");
+    while(1)
+    {
+        p2 = (student *)malloc(sizeof(student));
+        printf("ID:");
+		scanf("%d",&p2->id);
+
+		printf("Name:");
+		scanf("%s",p2->name);
+        
+		printf("Gender:");
+        scanf("%s",p2->gender);
+		printf("Birthdate:");
+        scanf("%s",p2->birthdate);
+        //orignal: scanf("%d %s %s %s",&p2->id,p2->name,p2->gender,p2->birthdate);
+        if(&p2->id == 0)
+        {
+            printf("List constructed successfully!\n");
+            break;
+        }
+        length ++;
+        p1->next = p2;
+        p2->next = NULL;
+        p1 = p1->next;
+    }
+    return ;
+}
+
+void Load()
+{
+    student *p,*q;
+    int c;
+    FILE* f;
+    f = fopen("input.txt","rb");
+    if(f == NULL)
+    {
+        return ;
+    }
+    fseek(f,0,SEEK_SET);
+    p = (student *)malloc(sizeof(student));
+    p->next = NULL;
+    head = p;
+    while(!feof(f))
+    {
+        c = fgetc(f);
+        if(c != -1)
+        {
+            fseek(f,-1,SEEK_CUR);
+        }
+        else
+        {
+            return ;
+        }
+        q = (student *)malloc(sizeof(student));
+        fscanf(f,"%d",&q->id);
+        fscanf(f,"%s",q->name);
+        fscanf(f,"%c",&q->gender);
+        fscanf(f,"%s",q->birthdate);
+        q->next = NULL;
+        p->next = q;
+        p = p->next;
+        length ++;//length of linker list
+    }
+}
+
+void Modify()
+{
+    student *p = head->next;
+    int num;
+    printf("Please input the ID of the student whose imformation is to be modified:");
+    scanf("%d",&num);
+    while(p != NULL)
+    {
+        if(p->id == num)
+        {
+            printf("information before modification:\n",num);
+            printf("%d %s %s %s",p->id,p->name,p->gender,p->birthdate);
+            printf("Please input the updated name of the student");
+            getchar();
+            gets(p->name);
+            printf("Please input the updated brthdate of the student");
+            gets(p->gender);
+            printf("The information of the student whose ID is %d is shown below:\n",num);
+            printf("%d %s %s %s",&p->id,p->id,p->name,p->gender,p->birthdate);
+            return ;
+        }
+        p = p->next;
+    }
+    if(p == NULL)
+    {
+        printf("This ID does not exist!!\n");
+        return ;
+    }
+}
+void display()
+{
+    student *p = head->next;
+    printf("Information of all students in the list:\n");
+    while(p != NULL)
+    {
+        printf("%d %s %s %s",p->id,p->name,p->gender,p->birthdate);
+        printf("\n");
+        p = p->next;
+    }
+    return ;
+}
+
+void search()
+{
+    int num,x;
+    char name[20];
+    student *p = head->next;
+    printf("Please select a search method:\n");
+    printf("1.Search by ID\t2.Search by name\n");
+    scanf("%d",&x);
+    if(x == 1)
+    {
+        printf("The student's ID is");
+        scanf("%d",num);
+        while(p != NULL)
+        {
+            if(p->id == num)
+            {
+                printf("The information of the student whose ID is %d is shown below:\n",num);
+                printf("%d %s %s %s",&p->id,p->id,p->name,p->gender,p->birthdate);
+                return ;
+            }
+            p = p->next;
+        }
+        if(p == NULL)
+        {
+            printf("No record!\n");
+        }
+    }
+    else if(x == 2)
+    {
+        printf("The student's name is:");
+        getchar();
+        gets(name);
+        p = head->next;
+        while(p != NULL)
+        {
+            if(strcmp(p->name,name) == 0)
+            {
+                printf("The information of the student whose name is %s is shown below:\n",name);
+                printf("%d %s %s %s",p->id,p->name,p->gender,p->birthdate);
+                return ;
+            }
+            p = p->next;
+        }
+        if(p == NULL)
+        {
+            printf("No record!\n");
+        }
+    }
+    return ;
+}
+
+void insert()
+{
+    int num,i;
+    student *p,*q;
+    p = head;
+
+    printf("Please input the place to insert:");
+    scanf("%d",&num);
+    if(num > length)
+    {
+        printf("Insert place not found\n");
+        return ;
+    }
+    else
+    {
+        printf("Please input the student information you want to create:\n");
+        q = (student *)malloc(sizeof(student));
+        scanf("%d %s %s %s",&p->id,p->id,p->name,p->gender,p->birthdate);
+        while(p != NULL)
+        {
+            if(p->id == q->id)
+            {
+                printf("The ID already existed!\n");
+                return ;
+            }
+            p = p->next;
+        }
+        p = head;
+        for(i=0; i<num; ++i)
+        {
+            p = p->next;
+        }
+        q->next = p->next;
+        p->next = q;
+        length ++;
+        printf("Operation completed!\n");
+        return ;
+    }
+}
+
+void Delete()
+{
+    int num;
+    student *p,*q;
+    q = head;
+    p = head->next;
+    printf("Please input the ID of the student whose imformation is to be deleted:\n");
+    scanf("%d",&num);
+
+    while(p != NULL)
+    {
+        if(p->id == num)
+        {
+            q->next = p->next;
+            free(p);
+            length --;
+            printf("Deletion completed! \n");
+            return ;
+        }
+        p = p->next;
+        q = q->next;
+    }
+    if(p == NULL)
+    {
+        printf("ID not found!\n");
+        return ;
+    }
+}
+
+void menu()
+{
+    printf("___________________________________________________\n");
+    printf("|        Student information System         |\n");
+    printf("|        0 Exit	                            |\n");
+    printf("|        1 Create student inforamtion       |\n");
+    printf("|        2 Create a list                    |\n");
+    printf("|        3 Display a list                   |\n");
+    printf("|        4 Search in a list	            |\n");
+    printf("|        5 Delete a student's information   |\n");
+    printf("|        6 Create a student's information   |\n");
+    printf("|        7 Modify a student's information   |\n");
+    printf("__________________________________________________\n");
+    return ;
+}
+
+int main(void)
+{
+    int a;
+    menu();
+    while(1)
+    {
+        printf("Please input a corresponding function:");
+        scanf("%d",&a);
+        switch(a)
+        {
+        case 0:
+            return 0;
+        case 1:
+            Load();
+            menu();
+            break;
+        case 2:
+            create();
+            menu();
+            break;
+        case 3:
+            if(head)
+            {
+                display();
+                menu();
+            }
+            else
+            {
+                printf("Please establish a list first!\n");
+                menu();
+            }
+            break;
+        case 4:
+            if(head)
+            {
+                search();
+                menu();
+            }
+            else
+            {
+                printf("Please establish a list first!\n");
+                menu();
+            }
+            break;
+        case 5:
+            if(head)
+            {
+                Delete();
+                menu();
+            }
+            else
+            {
+                printf("Please establish a list first!\n");
+                menu();
+            }
+            break;
+        case 6:
+            if(head)
+            {
+                insert();
+                menu();
+            }
+            else
+            {
+                printf("Please establish a list first!\n");
+                menu();
+            }
+            break;
+        case 7:
+            if(head)
+            {
+                Modify();
+                menu();
+            }
+            else
+            {
+                printf("Please establish a list first!\n");
+                menu();
+            }
+            break;
+        default:
+            break;
+        }
+        while (a>4 || a<1) {
+        printf("Invalid selection. Please press enter and select again. ");
+        scanf("%d", &a);
+    }
+
+    }
+    system("pause");
+    return 0;
+}
